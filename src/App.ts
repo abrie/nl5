@@ -7,3 +7,5 @@ class App {
     }
   }
 }
+
+export { App };
