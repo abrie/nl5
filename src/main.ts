@@ -10,6 +10,13 @@ const config = {
   width: 640,
   height: 480,
   parent: 'phaser-game',
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 300 },
+      debug: false
+    }
+  },
   scene: {
     preload: preload,
     create: create,
@@ -18,6 +25,9 @@ const config = {
 };
 
 const game = new Game(config);
+
+let player;
+let cursors;
 
 function preload() {
   // Load assets here
@@ -46,8 +56,32 @@ function create() {
   const tilemap = this.make.tilemap({ data: map, tileWidth: tileSize, tileHeight: tileSize });
   const tileset = tilemap.addTilesetImage('wall');
   const layer = tilemap.createLayer(0, tileset, 0, 0);
+
+  // Generate a texture for the player
+  generateTexture.call(this, tileSize, tileSize, 0xffff00);
+
+  // Create the player sprite and enable physics for it
+  player = this.physics.add.sprite(100, 100, 'player');
+  player.setBounce(0.2);
+  player.setCollideWorldBounds(true);
+
+  // Enable collision between the player and the tilemap layer
+  this.physics.add.collider(player, layer);
+
+  // Handle player input for movement and jumping
+  cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update() {
-  // Update game objects here
+  if (cursors.left.isDown) {
+    player.setVelocityX(-160);
+  } else if (cursors.right.isDown) {
+    player.setVelocityX(160);
+  } else {
+    player.setVelocityX(0);
+  }
+
+  if (cursors.up.isDown && player.body.touching.down) {
+    player.setVelocityY(-330);
+  }
 }
