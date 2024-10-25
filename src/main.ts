@@ -1,11 +1,11 @@
 import { App } from './App';
-import Phaser from 'phaser';
+import { Game, AUTO } from 'phaser';
 
 const app = new App();
 app.mount(document.getElementById('app'));
 
 const config = {
-  type: Phaser.AUTO,
+  type: AUTO,
   width: 640,
   height: 480,
   parent: 'phaser-game',
@@ -16,7 +16,7 @@ const config = {
   }
 };
 
-const game = new Phaser.Game(config);
+const game = new Game(config);
 
 function preload() {
   // Load assets here
