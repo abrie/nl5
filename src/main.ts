@@ -25,7 +25,8 @@ function preload() {
 
 function create() {
   const mapGenerator = new MapGenerator();
-  const map = mapGenerator.generateMap(Array(30).fill(0).map(() => Array(40).fill(0)));
+  const wallThickness = 2; // Set the desired wall thickness here
+  const map = mapGenerator.generateMap(Array(30).fill(0).map(() => Array(40).fill(0)), wallThickness);
 
   const graphics = this.add.graphics();
   const tileSize = 16;
