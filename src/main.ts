@@ -28,17 +28,24 @@ function create() {
   const wallThickness = 2; // Set the desired wall thickness here
   const map = mapGenerator.generateMap(Array(30).fill(0).map(() => Array(40).fill(0)), wallThickness);
 
-  const graphics = this.add.graphics();
   const tileSize = 16;
 
-  for (let row = 0; row < map.length; row++) {
-    for (let col = 0; col < map[row].length; col++) {
-      if (map[row][col] === 1) {
-        graphics.fillStyle(0x00ff00, 1.0);
-        graphics.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
-      }
-    }
+  // Generate a Phaser texture given width, height, and color
+  function generateTexture(width: number, height: number, color: number) {
+    const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+    graphics.fillStyle(color, 1.0);
+    graphics.fillRect(0, 0, width, height);
+    graphics.generateTexture('wall', width, height);
+    graphics.destroy();
   }
+
+  // Generate a texture for map walls
+  generateTexture.call(this, tileSize, tileSize, 0x00ff00);
+
+  // Create a Phaser TileMap using the generated map array and the generated wall texture
+  const tilemap = this.make.tilemap({ data: map, tileWidth: tileSize, tileHeight: tileSize });
+  const tileset = tilemap.addTilesetImage('wall');
+  const layer = tilemap.createLayer(0, tileset, 0, 0);
 }
 
 function update() {
