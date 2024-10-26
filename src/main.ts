@@ -109,7 +109,10 @@ function update() {
 	if (player.body.touching.down) {
 		console.log("Player is touching the ground");
 	}
-	if (cursors.up.isDown && player.body.touching.down) {
+	if (player.body.blocked.down) {
+		console.log("Player is blocked by the ground");
+	}
+	if (cursors.up.isDown && player.body.blocked.down) {
 		player.setVelocityY(-330);
 		console.log("Player's vertical velocity set to -330");
 	}
