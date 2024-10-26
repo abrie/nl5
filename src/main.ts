@@ -89,15 +89,18 @@ function create() {
 
 	// Handle player input for movement and jumping
 	cursors = this.input.keyboard.createCursorKeys();
+
+	// Set player's drag to simulate air friction
+	player.body.drag.x = 600;
 }
 
 function update() {
 	if (cursors.left.isDown) {
-		player.setVelocityX(-160);
+		player.body.acceleration.x = -600;
 	} else if (cursors.right.isDown) {
-		player.setVelocityX(160);
+		player.body.acceleration.x = 600;
 	} else {
-		player.setVelocityX(0);
+		player.body.acceleration.x = 0;
 	}
 
 	if (cursors.up.isDown && player.body.touching.down) {
