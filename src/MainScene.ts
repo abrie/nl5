@@ -5,6 +5,7 @@ class MainScene extends Scene {
   // Use definite assignment assertions for player and cursors properties
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private maxHorizontalVelocity: number = 300;
 
   constructor() {
     super({ key: "MainScene" });
@@ -97,6 +98,13 @@ class MainScene extends Scene {
     if (this.cursors.up.isDown && this.player.body.blocked.down) {
       this.player.setVelocityY(-330);
       console.log("Player's vertical velocity set to -330");
+    }
+
+    // Ensure the player's velocity does not exceed the maximum horizontal velocity
+    if (this.player.body.velocity.x > this.maxHorizontalVelocity) {
+      this.player.body.velocity.x = this.maxHorizontalVelocity;
+    } else if (this.player.body.velocity.x < -this.maxHorizontalVelocity) {
+      this.player.body.velocity.x = -this.maxHorizontalVelocity;
     }
   }
 }
