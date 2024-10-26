@@ -47,6 +47,7 @@ function create() {
 
 	// Generate a Phaser texture given width, height, and color
 	function generateTexture(
+		this: Phaser.Scene,
 		name: string,
 		width: number,
 		height: number,
