@@ -103,7 +103,14 @@ function update() {
 		player.body.acceleration.x = 0;
 	}
 
+	if (cursors.up.isDown) {
+		console.log("Up arrow key detected");
+	}
+	if (player.body.touching.down) {
+		console.log("Player is touching the ground");
+	}
 	if (cursors.up.isDown && player.body.touching.down) {
 		player.setVelocityY(-330);
+		console.log("Player's vertical velocity set to -330");
 	}
 }
