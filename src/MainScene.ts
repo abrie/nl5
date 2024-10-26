@@ -2,8 +2,8 @@ import { Scene } from "phaser";
 import { MapGenerator } from "./MapGenerator";
 
 class MainScene extends Scene {
-	private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-	private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
 	constructor() {
 		super({ key: "MainScene" });
