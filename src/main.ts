@@ -71,6 +71,9 @@ function create() {
 	const tileset = tilemap.addTilesetImage("wall");
 	const layer = tilemap.createLayer(0, tileset, 0, 0);
 
+	// Enable collision for wall tiles
+	layer.setCollisionByExclusion([-1]);
+
 	// Generate a texture for the player
 	generateTexture.call(this, "player", tileSize, tileSize, 0xffff00);
 
@@ -80,7 +83,7 @@ function create() {
 	player.setCollideWorldBounds(true);
 
 	// Enable collision between the player and the tilemap layer
-	this.physics.add.collider(player, layer);
+	this.physics.add.collider(player, layer, () => console.log('Player collided with a wall tile.'));
 
 	// Handle player input for movement and jumping
 	cursors = this.input.keyboard.createCursorKeys();
