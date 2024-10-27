@@ -7,6 +7,8 @@ class MainScene extends Scene {
 	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	private maxHorizontalVelocity: number = 300;
 	private loot!: Phaser.Physics.Arcade.StaticGroup;
+	private grapplingHookDeployed: boolean = false;
+	private grapplingHookLine!: Phaser.GameObjects.Graphics;
 
 	constructor() {
 		super({ key: "MainScene" });
@@ -90,12 +92,15 @@ class MainScene extends Scene {
 
 		// Add collision detection between the player and loot
 		this.physics.add.overlap(this.player, this.loot, this.collectLoot, undefined, this);
+
+		// Initialize grappling hook line
+		this.grapplingHookLine = this.add.graphics({ lineStyle: { width: 2, color: 0xff0000 } });
 	}
 
 	update() {
-		if (this.cursors.left.isDown) {
+		if (this.cursors.left.isDown && !this.grapplingHookDeployed) {
 			this.player.body.acceleration.x = -600;
-		} else if (this.cursors.right.isDown) {
+		} else if (this.cursors.right.isDown && !this.grapplingHookDeployed) {
 			this.player.body.acceleration.x = 600;
 		} else {
 			this.player.body.acceleration.x = 0;
@@ -120,7 +125,40 @@ class MainScene extends Scene {
 			this.player.body.velocity.x = this.maxHorizontalVelocity;
 		} else if (this.player.body.velocity.x < -this.maxHorizontalVelocity) {
 			this.player.body.velocity.x = -this.maxHorizontalVelocity;
+			}
+
+		// Handle grappling hook deployment and release
+		if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown) {
+			if (!this.grapplingHookDeployed) {
+				this.grapplingHookDeployed = true;
+				this.drawGrapplingHook();
+			}
+		} else {
+			if (this.grapplingHookDeployed) {
+				this.grapplingHookDeployed = false;
+				this.grapplingHookLine.clear();
+			}
 		}
+
+		// Handle vertical movement while grappling hook is deployed
+		if (this.grapplingHookDeployed) {
+			if (this.cursors.up.isDown) {
+				this.player.setVelocityY(-200);
+			} else if (this.cursors.down.isDown) {
+				this.player.setVelocityY(200);
+			} else {
+				this.player.setVelocityY(0);
+			}
+		}
+	}
+
+	private drawGrapplingHook() {
+		this.grapplingHookLine.clear();
+		this.grapplingHookLine.lineStyle(2, 0xff0000);
+		this.grapplingHookLine.beginPath();
+		this.grapplingHookLine.moveTo(this.player.x, this.player.y);
+		this.grapplingHookLine.lineTo(this.player.x, 0);
+		this.grapplingHookLine.strokePath();
 	}
 
 	private generateLoot(map: number[][], tileSize: number) {
