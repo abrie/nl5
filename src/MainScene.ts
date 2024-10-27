@@ -1,10 +1,11 @@
-import { Scene } from "phaser";
+import { Scene, Input } from "phaser";
 import { MapGenerator } from "./MapGenerator";
 
 class MainScene extends Scene {
 	// Use definite assignment assertions for player and cursors properties
 	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+	private map!: Phaser.Tilemaps.Tilemap;
 	private maxHorizontalVelocity: number = 300;
 	private loot!: Phaser.Physics.Arcade.StaticGroup;
 	private grapplingHookDeployed: boolean = false;
@@ -63,6 +64,7 @@ class MainScene extends Scene {
 			throw new Error("Failed to create tilemap layer.");
 		}
 
+		this.map = tilemap;
 		// Enable collision for wall tiles
 		layer.setCollisionByExclusion([0]);
 
@@ -75,9 +77,7 @@ class MainScene extends Scene {
 		this.player.setCollideWorldBounds(true);
 
 		// Enable collision between the player and the tilemap layer
-		this.physics.add.collider(this.player, layer, () =>
-			console.log("Player collided with a wall tile."),
-		);
+		this.physics.add.collider(this.player, layer, () => {});
 
 		// Handle player input for movement and jumping
 		if (this.input.keyboard !== null) {
@@ -91,10 +91,18 @@ class MainScene extends Scene {
 		this.generateLoot(map, tileSize);
 
 		// Add collision detection between the player and loot
-		this.physics.add.overlap(this.player, this.loot, this.collectLoot, undefined, this);
+		this.physics.add.overlap(
+			this.player,
+			this.loot,
+			this.collectLoot,
+			undefined,
+			this,
+		);
 
 		// Initialize grappling hook line
-		this.grapplingHookLine = this.add.graphics({ lineStyle: { width: 2, color: 0xff0000 } });
+		this.grapplingHookLine = this.add.graphics({
+			lineStyle: { width: 2, color: 0xff0000 },
+		});
 	}
 
 	update() {
@@ -107,17 +115,13 @@ class MainScene extends Scene {
 		}
 
 		if (this.cursors.up.isDown) {
-			console.log("Up arrow key detected");
 		}
 		if (this.player.body.touching.down) {
-			console.log("Player is touching the ground");
 		}
 		if (this.player.body.blocked.down) {
-			console.log("Player is blocked by the ground");
 		}
 		if (this.cursors.up.isDown && this.player.body.blocked.down) {
 			this.player.setVelocityY(-400);
-			console.log("Player's vertical velocity set to -330");
 		}
 
 		// Ensure the player's velocity does not exceed the maximum horizontal velocity
@@ -125,18 +129,20 @@ class MainScene extends Scene {
 			this.player.body.velocity.x = this.maxHorizontalVelocity;
 		} else if (this.player.body.velocity.x < -this.maxHorizontalVelocity) {
 			this.player.body.velocity.x = -this.maxHorizontalVelocity;
-			}
+		}
 
 		// Handle grappling hook deployment and release
-		if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown) {
-			if (!this.grapplingHookDeployed) {
-				this.grapplingHookDeployed = true;
-				this.drawGrapplingHook();
-			}
-		} else {
-			if (this.grapplingHookDeployed) {
-				this.grapplingHookDeployed = false;
-				this.grapplingHookLine.clear();
+		if (this.input.keyboard) {
+			if (this.input.keyboard.addKey(Input.Keyboard.KeyCodes.SHIFT).isDown) {
+				if (!this.grapplingHookDeployed) {
+					this.grapplingHookDeployed = true;
+					this.drawGrapplingHook();
+				}
+			} else {
+				if (this.grapplingHookDeployed) {
+					this.grapplingHookDeployed = false;
+					this.grapplingHookLine.clear();
+				}
 			}
 		}
 
@@ -162,13 +168,13 @@ class MainScene extends Scene {
 		this.grapplingHookLine.strokePath();
 	}
 
-	private getNearestTileAbovePlayer(): { x: number, y: number } {
+	private getNearestTileAbovePlayer(): { x: number; y: number } {
 		const tileSize = 16;
 		const playerTileX = Math.floor(this.player.x / tileSize);
 		const playerTileY = Math.floor(this.player.y / tileSize);
 		for (let y = playerTileY; y >= 0; y--) {
 			const tile = this.map.getTileAt(playerTileX, y);
-			if (tile && tile.index !== -1) {
+			if (tile && tile.index === 1) {
 				return { x: tile.pixelX + tileSize / 2, y: tile.pixelY + tileSize };
 			}
 		}
@@ -184,19 +190,31 @@ class MainScene extends Scene {
 		for (let row = 0; row < map.length; row++) {
 			for (let col = 0; col < map[row].length; col++) {
 				if (map[row][col] === 0 && Math.random() < 0.1) {
-					const lootItem = this.loot.create(col * tileSize, row * tileSize, "loot");
+					const lootItem = this.loot.create(
+						col * tileSize,
+						row * tileSize,
+						"loot",
+					);
 					lootItem.setOrigin(0, 0);
 				}
 			}
 		}
 	}
 
-	private collectLoot(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, lootItem: Phaser.Physics.Arcade.Sprite) {
+	private collectLoot(
+		player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+		lootItem: Phaser.Physics.Arcade.Sprite,
+	) {
 		lootItem.destroy();
 		// Add loot to player's inventory (to be implemented)
 	}
 
-	private generateTexture(name: string, width: number, height: number, color: number) {
+	private generateTexture(
+		name: string,
+		width: number,
+		height: number,
+		color: number,
+	) {
 		const graphics = this.make.graphics({ x: 0, y: 0 });
 		graphics.fillStyle(color, 1.0);
 		graphics.fillRect(0, 0, width, height);
