@@ -6,6 +6,7 @@ class MainScene extends Scene {
 	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	private maxHorizontalVelocity: number = 300;
+	private loot!: Phaser.Physics.Arcade.Group;
 
 	constructor() {
 		super({ key: "MainScene" });
@@ -83,6 +84,12 @@ class MainScene extends Scene {
 
 		// Set player's drag to simulate air friction
 		this.player.body.drag.x = 600;
+
+		// Generate loot and place it randomly in empty tiles
+		this.generateLoot(map, tileSize);
+
+		// Add collision detection between the player and loot
+		this.physics.add.overlap(this.player, this.loot, this.collectLoot, undefined, this);
 	}
 
 	update() {
@@ -114,6 +121,35 @@ class MainScene extends Scene {
 		} else if (this.player.body.velocity.x < -this.maxHorizontalVelocity) {
 			this.player.body.velocity.x = -this.maxHorizontalVelocity;
 		}
+	}
+
+	private generateLoot(map: number[][], tileSize: number) {
+		this.loot = this.physics.add.group();
+
+		// Generate a texture for the loot
+		this.generateTexture("loot", tileSize, tileSize, 0xff0000);
+
+		for (let row = 0; row < map.length; row++) {
+			for (let col = 0; col < map[row].length; col++) {
+				if (map[row][col] === 0 && Math.random() < 0.1) {
+					const lootItem = this.loot.create(col * tileSize, row * tileSize, "loot");
+					lootItem.setOrigin(0, 0);
+				}
+			}
+		}
+	}
+
+	private collectLoot(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, lootItem: Phaser.Physics.Arcade.Sprite) {
+		lootItem.destroy();
+		// Add loot to player's inventory (to be implemented)
+	}
+
+	private generateTexture(name: string, width: number, height: number, color: number) {
+		const graphics = this.make.graphics({ x: 0, y: 0 });
+		graphics.fillStyle(color, 1.0);
+		graphics.fillRect(0, 0, width, height);
+		graphics.generateTexture(name, width, height);
+		graphics.destroy();
 	}
 }
 
