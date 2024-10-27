@@ -157,8 +157,22 @@ class MainScene extends Scene {
 		this.grapplingHookLine.lineStyle(2, 0xff0000);
 		this.grapplingHookLine.beginPath();
 		this.grapplingHookLine.moveTo(this.player.x, this.player.y);
-		this.grapplingHookLine.lineTo(this.player.x, 0);
+		const anchorPoint = this.getNearestTileAbovePlayer();
+		this.grapplingHookLine.lineTo(anchorPoint.x, anchorPoint.y);
 		this.grapplingHookLine.strokePath();
+	}
+
+	private getNearestTileAbovePlayer(): { x: number, y: number } {
+		const tileSize = 16;
+		const playerTileX = Math.floor(this.player.x / tileSize);
+		const playerTileY = Math.floor(this.player.y / tileSize);
+		for (let y = playerTileY; y >= 0; y--) {
+			const tile = this.map.getTileAt(playerTileX, y);
+			if (tile && tile.index !== -1) {
+				return { x: tile.pixelX + tileSize / 2, y: tile.pixelY + tileSize };
+			}
+		}
+		return { x: this.player.x, y: 0 };
 	}
 
 	private generateLoot(map: number[][], tileSize: number) {
