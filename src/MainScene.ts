@@ -104,7 +104,7 @@ class MainScene extends Scene {
 			console.log("Player is blocked by the ground");
 		}
 		if (this.cursors.up.isDown && this.player.body.blocked.down) {
-			this.player.setVelocityY(-330);
+			this.player.setVelocityY(-400);
 			console.log("Player's vertical velocity set to -330");
 		}
 
