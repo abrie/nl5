@@ -131,7 +131,6 @@ class MainScene extends Scene {
 		if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown) {
 			if (!this.grapplingHookDeployed) {
 				this.grapplingHookDeployed = true;
-				this.drawGrapplingHook();
 			}
 		} else {
 			if (this.grapplingHookDeployed) {
@@ -151,6 +150,7 @@ class MainScene extends Scene {
 			}
 			this.player.setVelocityX(0); // Set horizontal velocity to zero
 			this.player.body.acceleration.x = 0; // Set horizontal acceleration to zero
+			this.drawGrapplingHook();
 		}
 	}
 
