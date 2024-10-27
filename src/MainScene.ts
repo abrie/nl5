@@ -149,6 +149,8 @@ class MainScene extends Scene {
 			} else {
 				this.player.setVelocityY(0);
 			}
+			this.player.setVelocityX(0); // Set horizontal velocity to zero
+			this.player.body.acceleration.x = 0; // Set horizontal acceleration to zero
 		}
 	}
 
