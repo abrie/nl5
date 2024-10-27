@@ -6,7 +6,7 @@ class MainScene extends Scene {
 	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	private maxHorizontalVelocity: number = 300;
-	private loot!: Phaser.Physics.Arcade.Group;
+	private loot!: Phaser.Physics.Arcade.StaticGroup;
 
 	constructor() {
 		super({ key: "MainScene" });
@@ -124,7 +124,7 @@ class MainScene extends Scene {
 	}
 
 	private generateLoot(map: number[][], tileSize: number) {
-		this.loot = this.physics.add.group();
+		this.loot = this.physics.add.staticGroup();
 
 		// Generate a texture for the loot
 		this.generateTexture("loot", tileSize, tileSize, 0xff0000);
