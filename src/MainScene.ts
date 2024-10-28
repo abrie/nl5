@@ -30,7 +30,7 @@ class MainScene extends Scene {
 	create() {
 		const mapGenerator = new MapGenerator();
 		const wallThickness = 2; // Set the desired wall thickness here
-		const map = mapGenerator.generateMap(
+		let map = mapGenerator.generateMap(
 			Array(Config.MapHeight)
 				.fill(0)
 				.map(() => Array(Config.MapWidth).fill(0)),
@@ -38,6 +38,18 @@ class MainScene extends Scene {
 			Config.MapWidth,
 			Config.MapHeight,
 		);
+
+		// Ensure the generated map has a sufficient playable area
+		while (!mapGenerator.isPlayableAreaSufficient(map)) {
+			map = mapGenerator.generateMap(
+				Array(Config.MapHeight)
+					.fill(0)
+					.map(() => Array(Config.MapWidth).fill(0)),
+				wallThickness,
+				Config.MapWidth,
+				Config.MapHeight,
+			);
+		}
 
 		// Generate a Phaser texture given width, height, and color
 		function generateTexture(
