@@ -22,10 +22,12 @@ class MainScene extends Scene {
 	create() {
 		const mapGenerator = new MapGenerator();
 		const wallThickness = 2; // Set the desired wall thickness here
+		const mapWidth = 60; // Set the desired map width here
+		const mapHeight = 45; // Set the desired map height here
 		const map = mapGenerator.generateMap(
-			Array(30)
+			Array(mapHeight)
 				.fill(0)
-				.map(() => Array(40).fill(0)),
+				.map(() => Array(mapWidth).fill(0)),
 			wallThickness,
 		);
 
@@ -102,7 +104,13 @@ class MainScene extends Scene {
 		// Initialize grappling hook line
 		this.grapplingHookLine = this.add.graphics({
 			lineStyle: { width: 2, color: 0xff0000 },
-		});
+			});
+
+		// Set up the camera to follow the player
+		this.cameras.main.startFollow(this.player);
+
+		// Set the camera bounds to match the size of the map
+		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 	}
 
 	update() {

@@ -18,6 +18,8 @@ const config = {
 		},
 	},
 	scene: MainScene,
+	mapWidth: 60, // Configuration option for map width
+	mapHeight: 45, // Configuration option for map height
 };
 
 const game = new Game(config);
