@@ -1,10 +1,10 @@
-import { Scene, Input, Tweens } from "phaser";
+import { Scene, Input } from "phaser";
 import { MapGenerator } from "./MapGenerator";
 
 const Config = {
-	TileSize: 4,
-	MapWidth: 240,
-	MapHeight: 180,
+	TileSize: 16,
+	MapWidth: 10,
+	MapHeight: 30,
 };
 
 class MainScene extends Scene {
@@ -145,15 +145,17 @@ class MainScene extends Scene {
 			0,
 			this.map.widthInPixels,
 			this.map.heightInPixels,
-			);
+		);
 
 		// Set the initial camera zoom to unzoomed
 		this.cameras.main.setZoom(1);
 
 		// Add input handler for the Z key
-		this.input.keyboard.on('keydown-Z', () => {
-			this.toggleZoom();
-		});
+		if (this.input.keyboard) {
+			this.input.keyboard.on("keydown-Z", () => {
+				this.toggleZoom();
+			});
+		}
 	}
 
 	update() {
@@ -282,7 +284,7 @@ class MainScene extends Scene {
 			targets: this.cameras.main,
 			zoom: targetZoom,
 			duration: 500,
-			ease: 'Power2'
+			ease: "Power2",
 		});
 	}
 }
