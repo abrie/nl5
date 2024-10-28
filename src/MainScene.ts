@@ -1,6 +1,12 @@
 import { Scene, Input } from "phaser";
 import { MapGenerator } from "./MapGenerator";
 
+const Config = {
+	TileSize: 4,
+	MapWidth: 240,
+	MapHeight: 180,
+};
+
 class MainScene extends Scene {
 	// Use definite assignment assertions for player and cursors properties
 	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -22,18 +28,14 @@ class MainScene extends Scene {
 	create() {
 		const mapGenerator = new MapGenerator();
 		const wallThickness = 2; // Set the desired wall thickness here
-		const mapWidth = 60; // Set the desired map width here
-		const mapHeight = 45; // Set the desired map height here
 		const map = mapGenerator.generateMap(
-			Array(mapHeight)
+			Array(Config.MapHeight)
 				.fill(0)
-				.map(() => Array(mapWidth).fill(0)),
+				.map(() => Array(Config.MapWidth).fill(0)),
 			wallThickness,
-			mapWidth,
-			mapHeight,
+			Config.MapWidth,
+			Config.MapHeight,
 		);
-
-		const tileSize = 16;
 
 		// Generate a Phaser texture given width, height, and color
 		function generateTexture(
@@ -51,13 +53,19 @@ class MainScene extends Scene {
 		}
 
 		// Generate a texture for map walls
-		generateTexture.call(this, "wall", tileSize, tileSize, 0x00ff00);
+		generateTexture.call(
+			this,
+			"wall",
+			Config.TileSize,
+			Config.TileSize,
+			0x00ff00,
+		);
 
 		// Create a Phaser TileMap using the generated map array and the generated wall texture
 		const tilemap = this.make.tilemap({
 			data: map,
-			tileWidth: tileSize,
-			tileHeight: tileSize,
+			tileWidth: Config.TileSize,
+			tileHeight: Config.TileSize,
 		});
 		const tileset = tilemap.addTilesetImage("wall");
 		if (tileset === null) {
@@ -73,7 +81,13 @@ class MainScene extends Scene {
 		layer.setCollisionByExclusion([0]);
 
 		// Generate a texture for the player
-		generateTexture.call(this, "player", tileSize, tileSize, 0xffff00);
+		generateTexture.call(
+			this,
+			"player",
+			Config.TileSize,
+			Config.TileSize,
+			0xffff00,
+		);
 
 		// Create the player sprite and enable physics for it
 		this.player = this.physics.add.sprite(100, 100, "player");
@@ -92,7 +106,7 @@ class MainScene extends Scene {
 		this.player.body.drag.x = 600;
 
 		// Generate loot and place it randomly in empty tiles
-		this.generateLoot(map, tileSize);
+		this.generateLoot(map, Config.TileSize);
 
 		// Add collision detection between the player and loot
 		this.physics.add.overlap(
@@ -181,13 +195,15 @@ class MainScene extends Scene {
 	}
 
 	private getNearestTileAbovePlayer(): { x: number; y: number } {
-		const tileSize = 16;
-		const playerTileX = Math.floor(this.player.x / tileSize);
-		const playerTileY = Math.floor(this.player.y / tileSize);
+		const playerTileX = Math.floor(this.player.x / Config.TileSize);
+		const playerTileY = Math.floor(this.player.y / Config.TileSize);
 		for (let y = playerTileY; y >= 0; y--) {
 			const tile = this.map.getTileAt(playerTileX, y);
 			if (tile && tile.index === 1) {
-				return { x: tile.pixelX + tileSize / 2, y: tile.pixelY + tileSize };
+				return {
+					x: tile.pixelX + Config.TileSize / 2,
+					y: tile.pixelY + Config.TileSize,
+				};
 			}
 		}
 		return { x: this.player.x, y: 0 };
@@ -197,7 +213,7 @@ class MainScene extends Scene {
 		this.loot = this.physics.add.staticGroup();
 
 		// Generate a texture for the loot
-		this.generateTexture("loot", tileSize, tileSize, 0xff0000);
+		this.generateTexture("loot", Config.TileSize, Config.TileSize, 0xff0000);
 
 		for (let row = 0; row < map.length; row++) {
 			for (let col = 0; col < map[row].length; col++) {
