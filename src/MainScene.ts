@@ -29,6 +29,8 @@ class MainScene extends Scene {
 				.fill(0)
 				.map(() => Array(mapWidth).fill(0)),
 			wallThickness,
+			mapWidth,
+			mapHeight,
 		);
 
 		const tileSize = 16;
@@ -76,7 +78,7 @@ class MainScene extends Scene {
 		// Create the player sprite and enable physics for it
 		this.player = this.physics.add.sprite(100, 100, "player");
 		this.player.setBounce(0.2);
-		this.player.setCollideWorldBounds(true);
+		this.player.setCollideWorldBounds(false);
 
 		// Enable collision between the player and the tilemap layer
 		this.physics.add.collider(this.player, layer, () => {});
@@ -104,13 +106,18 @@ class MainScene extends Scene {
 		// Initialize grappling hook line
 		this.grapplingHookLine = this.add.graphics({
 			lineStyle: { width: 2, color: 0xff0000 },
-			});
+		});
 
 		// Set up the camera to follow the player
 		this.cameras.main.startFollow(this.player);
 
 		// Set the camera bounds to match the size of the map
-		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+		this.cameras.main.setBounds(
+			0,
+			0,
+			this.map.widthInPixels,
+			this.map.heightInPixels,
+		);
 	}
 
 	update() {
@@ -122,12 +129,6 @@ class MainScene extends Scene {
 			this.player.body.acceleration.x = 0;
 		}
 
-		if (this.cursors.up.isDown) {
-		}
-		if (this.player.body.touching.down) {
-		}
-		if (this.player.body.blocked.down) {
-		}
 		if (this.cursors.up.isDown && this.player.body.blocked.down) {
 			this.player.setVelocityY(-400);
 		}
