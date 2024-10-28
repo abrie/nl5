@@ -205,8 +205,8 @@ class MainScene extends Scene {
 	}
 
 	private collectLoot(
-		player: Phaser.GameObjects.GameObject,
-		lootItem: Phaser.GameObjects.GameObject,
+		player: Phaser.Types.Physics.Arcade.GameObjectWithBody,
+		lootItem: Phaser.Types.Physics.Arcade.GameObjectWithBody,
 	) {
 		(lootItem as Phaser.Physics.Arcade.Sprite).destroy();
 		// Add loot to player's inventory (to be implemented)
