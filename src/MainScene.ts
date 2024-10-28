@@ -1,4 +1,4 @@
-import { Scene, Input } from "phaser";
+import { Scene, Input, Tweens } from "phaser";
 import { MapGenerator } from "./MapGenerator";
 
 const Config = {
@@ -16,6 +16,8 @@ class MainScene extends Scene {
 	private loot!: Phaser.Physics.Arcade.StaticGroup;
 	private grapplingHookDeployed: boolean = false;
 	private grapplingHookLine!: Phaser.GameObjects.Graphics;
+	private isZoomed: boolean = false;
+	private zoomTween!: Phaser.Tweens.Tween;
 
 	constructor() {
 		super({ key: "MainScene" });
@@ -131,7 +133,15 @@ class MainScene extends Scene {
 			0,
 			this.map.widthInPixels,
 			this.map.heightInPixels,
-		);
+			);
+
+		// Set the initial camera zoom to unzoomed
+		this.cameras.main.setZoom(1);
+
+		// Add input handler for the Z key
+		this.input.keyboard.on('keydown-Z', () => {
+			this.toggleZoom();
+		});
 	}
 
 	update() {
@@ -248,6 +258,20 @@ class MainScene extends Scene {
 		graphics.fillRect(0, 0, width, height);
 		graphics.generateTexture(name, width, height);
 		graphics.destroy();
+	}
+
+	private toggleZoom() {
+		const targetZoom = this.isZoomed ? 1 : 2;
+		this.isZoomed = !this.isZoomed;
+		if (this.zoomTween) {
+			this.zoomTween.stop();
+		}
+		this.zoomTween = this.tweens.add({
+			targets: this.cameras.main,
+			zoom: targetZoom,
+			duration: 500,
+			ease: 'Power2'
+		});
 	}
 }
 
