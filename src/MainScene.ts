@@ -197,7 +197,9 @@ class MainScene extends Scene {
 						col * tileSize,
 						row * tileSize,
 						"loot",
-					);
+						undefined,
+						true,
+					) as Phaser.Types.Physics.Arcade.GameObjectWithBody;
 					lootItem.setOrigin(0, 0);
 				}
 			}
