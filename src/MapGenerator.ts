@@ -1,7 +1,7 @@
 class MapGenerator {
-  generateMap(map: number[][], wallThickness: number = 0): number[][] {
-    const rows = map.length;
-    const cols = map[0].length;
+  generateMap(map: number[][], wallThickness: number = 0, mapWidth: number, mapHeight: number): number[][] {
+    const rows = mapHeight;
+    const cols = mapWidth;
 
     // Initialize the map with walls based on wallThickness
     for (let row = 0; row < rows; row++) {
