@@ -20,6 +20,7 @@ class MainScene extends Scene {
 	private zoomTween!: Phaser.Tweens.Tween;
 	private remainingTimeText!: Phaser.GameObjects.Text;
 	private timerEvent!: Phaser.Time.TimerEvent;
+	private playerCollider!: Phaser.Physics.Arcade.Collider; // Added playerCollider property
 
 	constructor() {
 		super({ key: "MainScene" });
@@ -111,7 +112,7 @@ class MainScene extends Scene {
 		this.player.setCollideWorldBounds(false);
 
 		// Enable collision between the player and the tilemap layer
-		this.physics.add.collider(this.player, layer, () => {});
+		this.playerCollider = this.physics.add.collider(this.player, layer, () => {});
 
 		// Handle player input for movement and jumping
 		if (this.input.keyboard !== null) {
@@ -335,6 +336,9 @@ class MainScene extends Scene {
 			);
 		}
 
+		// Remove the previous collider
+		this.physics.world.removeCollider(this.playerCollider);
+
 		// Create a Phaser TileMap using the generated map array and the generated wall texture
 		const tilemap = this.make.tilemap({
 			data: map,
@@ -353,6 +357,9 @@ class MainScene extends Scene {
 		this.map = tilemap;
 		// Enable collision for wall tiles
 		layer.setCollisionByExclusion([0]);
+
+		// Update the player collider to interact with the new tilemap layer
+		this.playerCollider = this.physics.add.collider(this.player, layer, () => {});
 
 		// Generate loot and place it randomly in empty tiles
 		this.generateLoot(map, Config.TileSize);
