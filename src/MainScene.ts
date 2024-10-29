@@ -1,5 +1,6 @@
 import { Scene, Input } from "phaser";
 import { MapGenerator } from "./MapGenerator";
+import { getTileAt, putTileAt } from "phaser";
 
 const Config = {
 	TileSize: 16,
@@ -307,7 +308,17 @@ class MainScene extends Scene {
 			Config.MapWidth,
 			Config.MapHeight,
 			wallThickness,
-		);
+			);
+
+		const layer = this.map.getLayer(0).tilemapLayer;
+		for (let row = 0; row < map.length; row++) {
+			for (let col = 0; col < map[row].length; col++) {
+				const tile = getTileAt(layer, col, row);
+				if (tile) {
+					putTileAt(map[row][col], col, row, layer);
+				}
+			}
+		}
 	}
 }
 
