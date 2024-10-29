@@ -169,7 +169,10 @@ class MainScene extends Scene {
 			callback: this.regenerateMap,
 			callbackScope: this,
 			loop: true,
-		});
+			});
+
+		// Bring the player sprite to the front
+		this.bringPlayerToFront();
 	}
 
 	update() {
@@ -372,7 +375,14 @@ class MainScene extends Scene {
 			0,
 			this.map.widthInPixels,
 			this.map.heightInPixels,
-		);
+			);
+
+		// Bring the player sprite to the front
+		this.bringPlayerToFront();
+	}
+
+	private bringPlayerToFront() {
+		this.children.bringToTop(this.player);
 	}
 }
 
