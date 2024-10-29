@@ -339,6 +339,7 @@ class MainScene extends Scene {
 
 		layer.tilemapLayer.setCollisionByExclusion([0]);
 
+		this.physics.world.colliders.remove(this.playerCollider);
 		this.playerCollider = this.physics.add.collider(
 			this.player,
 			this.getWallLayer(this.map),
