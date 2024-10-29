@@ -18,6 +18,8 @@ class MainScene extends Scene {
 	private grapplingHookLine!: Phaser.GameObjects.Graphics;
 	private isZoomed: boolean = false;
 	private zoomTween!: Phaser.Tweens.Tween;
+	private remainingTimeText!: Phaser.GameObjects.Text;
+	private timerEvent!: Phaser.Time.TimerEvent;
 
 	constructor() {
 		super({ key: "MainScene" });
@@ -151,11 +153,23 @@ class MainScene extends Scene {
 		this.cameras.main.setZoom(1);
 
 		// Add input handler for the Z key
-		if (this.input.keyboard) {
-			this.input.keyboard.on("keydown-Z", () => {
-				this.toggleZoom();
-			});
-		}
+		this.input.keyboard.on("keydown-Z", () => {
+			this.toggleZoom();
+		});
+
+		// Add a Phaser text object to display the remaining time
+		this.remainingTimeText = this.add.text(10, 10, "Time: 30", {
+			fontSize: "20px",
+			color: "#ffffff",
+		});
+
+		// Add a timer to regenerate the map every 30 seconds
+		this.timerEvent = this.time.addEvent({
+			delay: 30000,
+			callback: this.regenerateMap,
+			callbackScope: this,
+			loop: true,
+		});
 	}
 
 	update() {
@@ -206,6 +220,12 @@ class MainScene extends Scene {
 			this.player.body.acceleration.x = 0; // Set horizontal acceleration to zero
 			this.drawGrapplingHook();
 		}
+
+		// Update the remaining time text
+		const remainingTime = Math.ceil(
+			(this.timerEvent.delay - this.timerEvent.getElapsed()) / 1000,
+		);
+		this.remainingTimeText.setText(`Time: ${remainingTime}`);
 	}
 
 	private drawGrapplingHook() {
@@ -286,6 +306,73 @@ class MainScene extends Scene {
 			duration: 500,
 			ease: "Power2",
 		});
+	}
+
+	private regenerateMap() {
+		const mapGenerator = new MapGenerator();
+		const wallThickness = 2; // Set the desired wall thickness here
+		let map = mapGenerator.generateMap(
+			Array(Config.MapHeight)
+				.fill(0)
+				.map(() => Array(Config.MapWidth).fill(0)),
+			wallThickness,
+			Config.MapWidth,
+			Config.MapHeight,
+		);
+
+		// Ensure the generated map has a sufficient playable area
+		while (!mapGenerator.isPlayableAreaSufficient(map)) {
+			map = mapGenerator.generateMap(
+				Array(Config.MapHeight)
+					.fill(0)
+					.map(() => Array(Config.MapWidth).fill(0)),
+				wallThickness,
+				Config.MapWidth,
+				Config.MapHeight,
+			);
+		}
+
+		// Create a Phaser TileMap using the generated map array and the generated wall texture
+		const tilemap = this.make.tilemap({
+			data: map,
+			tileWidth: Config.TileSize,
+			tileHeight: Config.TileSize,
+		});
+		const tileset = tilemap.addTilesetImage("wall");
+		if (tileset === null) {
+			throw new Error("Failed to add a Tileset Image");
+		}
+		const layer = tilemap.createLayer(0, tileset, 0, 0);
+		if (layer === null) {
+			throw new Error("Failed to create tilemap layer.");
+		}
+
+		this.map = tilemap;
+		// Enable collision for wall tiles
+		layer.setCollisionByExclusion([0]);
+
+		// Generate loot and place it randomly in empty tiles
+		this.generateLoot(map, Config.TileSize);
+
+		// Add collision detection between the player and loot
+		this.physics.add.overlap(
+			this.player,
+			this.loot,
+			this.collectLoot,
+			undefined,
+			this,
+		);
+
+		// Set up the camera to follow the player
+		this.cameras.main.startFollow(this.player);
+
+		// Set the camera bounds to match the size of the map
+		this.cameras.main.setBounds(
+			0,
+			0,
+			this.map.widthInPixels,
+			this.map.heightInPixels,
+		);
 	}
 }
 
