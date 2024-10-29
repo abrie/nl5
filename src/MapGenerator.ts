@@ -122,4 +122,4 @@ class MapGenerator {
 	}
 }
 
-export { MapGenerator, generatePlayableMap };
+export { MapGenerator };

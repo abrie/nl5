@@ -1,6 +1,5 @@
 import { Scene, Input } from "phaser";
 import { MapGenerator } from "./MapGenerator";
-import { getTileAt, putTileAt } from "phaser";
 
 const Config = {
 	TileSize: 16,
@@ -31,7 +30,16 @@ class MainScene extends Scene {
 		// Load assets here
 	}
 
-	create() {
+	getWallLayer(map: Phaser.Tilemaps.Tilemap): Phaser.Tilemaps.TilemapLayer {
+		const layer = map.getLayer(0);
+		if (layer === null) {
+			throw new Error("No layer with index 0");
+		}
+
+		return layer.tilemapLayer;
+	}
+
+	instantiateMap(): Phaser.Tilemaps.Tilemap {
 		const mapGenerator = new MapGenerator();
 		const wallThickness = 2; // Set the desired wall thickness here
 		let map = mapGenerator.generatePlayableMap(
@@ -40,6 +48,27 @@ class MainScene extends Scene {
 			wallThickness,
 		);
 
+		const tilemap = this.make.tilemap({
+			data: map,
+			tileWidth: Config.TileSize,
+			tileHeight: Config.TileSize,
+		});
+		const tileset = tilemap.addTilesetImage("wall");
+		if (tileset === null) {
+			throw new Error("Failed to add a Tileset Image");
+		}
+		const layer = tilemap.createLayer(0, tileset, 0, 0);
+		if (layer === null) {
+			throw new Error("Failed to create tilemap layer.");
+		}
+
+		// Enable collision for wall tiles
+		layer.setCollisionByExclusion([0]);
+
+		return tilemap;
+	}
+
+	create() {
 		// Generate a Phaser texture given width, height, and color
 		function generateTexture(
 			this: Phaser.Scene,
@@ -65,24 +94,6 @@ class MainScene extends Scene {
 		);
 
 		// Create a Phaser TileMap using the generated map array and the generated wall texture
-		const tilemap = this.make.tilemap({
-			data: map,
-			tileWidth: Config.TileSize,
-			tileHeight: Config.TileSize,
-		});
-		const tileset = tilemap.addTilesetImage("wall");
-		if (tileset === null) {
-			throw new Error("Failed to add a Tileset Image");
-		}
-		const layer = tilemap.createLayer(0, tileset, 0, 0);
-		if (layer === null) {
-			throw new Error("Failed to create tilemap layer.");
-		}
-
-		this.map = tilemap;
-		// Enable collision for wall tiles
-		layer.setCollisionByExclusion([0]);
-
 		// Generate a texture for the player
 		generateTexture.call(
 			this,
@@ -92,15 +103,14 @@ class MainScene extends Scene {
 			0xffff00,
 		);
 
-		// Create the player sprite and enable physics for it
+		this.map = this.instantiateMap();
 		this.player = this.physics.add.sprite(100, 100, "player");
 		this.player.setBounce(0.2);
 		this.player.setCollideWorldBounds(false);
 
-		// Enable collision between the player and the tilemap layer
 		this.playerCollider = this.physics.add.collider(
 			this.player,
-			layer,
+			this.getWallLayer(this.map),
 			() => {},
 		);
 
@@ -112,8 +122,10 @@ class MainScene extends Scene {
 		// Set player's drag to simulate air friction
 		this.player.body.drag.x = 600;
 
+		/*
 		// Generate loot and place it randomly in empty tiles
-		this.generateLoot(map, Config.TileSize);
+		this.generateLoot(this.map, Config.TileSize);
+    */
 
 		// Add collision detection between the player and loot
 		this.physics.add.overlap(
@@ -158,8 +170,8 @@ class MainScene extends Scene {
 
 		// Add a timer to regenerate the map every 30 seconds
 		this.timerEvent = this.time.addEvent({
-			delay: 10000,
-			callback: this.regenerateMap,
+			delay: 3000,
+			callback: () => this.regenerateMap(this.map),
 			callbackScope: this,
 			loop: true,
 		});
@@ -301,24 +313,37 @@ class MainScene extends Scene {
 		});
 	}
 
-	private regenerateMap() {
+	private regenerateMap(tilemap: Phaser.Tilemaps.Tilemap) {
 		const mapGenerator = new MapGenerator();
 		const wallThickness = 2; // Set the desired wall thickness here
 		let map = mapGenerator.generatePlayableMap(
 			Config.MapWidth,
 			Config.MapHeight,
 			wallThickness,
-			);
+		);
 
-		const layer = this.map.getLayer(0).tilemapLayer;
+		// Enable collision between the player and the tilemap layer
+		const layer = tilemap.getLayer(0);
+		if (layer === null) {
+			throw new Error("No layer with index 0");
+		}
+
 		for (let row = 0; row < map.length; row++) {
 			for (let col = 0; col < map[row].length; col++) {
-				const tile = getTileAt(layer, col, row);
+				const tile = layer.tilemapLayer.getTileAt(col, row);
 				if (tile) {
-					putTileAt(map[row][col], col, row, layer);
+					layer.tilemapLayer.putTileAt(map[row][col] === 0 ? -1 : 0, col, row);
 				}
 			}
 		}
+
+		layer.tilemapLayer.setCollisionByExclusion([0]);
+
+		this.playerCollider = this.physics.add.collider(
+			this.player,
+			this.getWallLayer(this.map),
+			() => {},
+		);
 	}
 }
 
