@@ -33,26 +33,11 @@ class MainScene extends Scene {
 	create() {
 		const mapGenerator = new MapGenerator();
 		const wallThickness = 2; // Set the desired wall thickness here
-		let map = mapGenerator.generateMap(
-			Array(Config.MapHeight)
-				.fill(0)
-				.map(() => Array(Config.MapWidth).fill(0)),
-			wallThickness,
+		let map = mapGenerator.generatePlayableMap(
 			Config.MapWidth,
 			Config.MapHeight,
+			wallThickness,
 		);
-
-		// Ensure the generated map has a sufficient playable area
-		while (!mapGenerator.isPlayableAreaSufficient(map)) {
-			map = mapGenerator.generateMap(
-				Array(Config.MapHeight)
-					.fill(0)
-					.map(() => Array(Config.MapWidth).fill(0)),
-				wallThickness,
-				Config.MapWidth,
-				Config.MapHeight,
-			);
-		}
 
 		// Generate a Phaser texture given width, height, and color
 		function generateTexture(
@@ -112,7 +97,11 @@ class MainScene extends Scene {
 		this.player.setCollideWorldBounds(false);
 
 		// Enable collision between the player and the tilemap layer
-		this.playerCollider = this.physics.add.collider(this.player, layer, () => {});
+		this.playerCollider = this.physics.add.collider(
+			this.player,
+			layer,
+			() => {},
+		);
 
 		// Handle player input for movement and jumping
 		if (this.input.keyboard !== null) {
@@ -154,9 +143,11 @@ class MainScene extends Scene {
 		this.cameras.main.setZoom(1);
 
 		// Add input handler for the Z key
-		this.input.keyboard.on("keydown-Z", () => {
-			this.toggleZoom();
-		});
+		if (this.input.keyboard) {
+			this.input.keyboard.on("keydown-Z", () => {
+				this.toggleZoom();
+			});
+		}
 
 		// Add a Phaser text object to display the remaining time
 		this.remainingTimeText = this.add.text(10, 10, "Time: 30", {
@@ -166,14 +157,11 @@ class MainScene extends Scene {
 
 		// Add a timer to regenerate the map every 30 seconds
 		this.timerEvent = this.time.addEvent({
-			delay: 30000,
+			delay: 10000,
 			callback: this.regenerateMap,
 			callbackScope: this,
 			loop: true,
-			});
-
-		// Bring the player sprite to the front
-		this.bringPlayerToFront();
+		});
 	}
 
 	update() {
@@ -315,88 +303,11 @@ class MainScene extends Scene {
 	private regenerateMap() {
 		const mapGenerator = new MapGenerator();
 		const wallThickness = 2; // Set the desired wall thickness here
-		let map = mapGenerator.generateMap(
-			Array(Config.MapHeight)
-				.fill(0)
-				.map(() => Array(Config.MapWidth).fill(0)),
-			wallThickness,
+		let map = mapGenerator.generatePlayableMap(
 			Config.MapWidth,
 			Config.MapHeight,
+			wallThickness,
 		);
-
-		// Ensure the generated map has a sufficient playable area
-		while (!mapGenerator.isPlayableAreaSufficient(map)) {
-			map = mapGenerator.generateMap(
-				Array(Config.MapHeight)
-					.fill(0)
-					.map(() => Array(Config.MapWidth).fill(0)),
-				wallThickness,
-				Config.MapWidth,
-				Config.MapHeight,
-			);
-		}
-
-		// Remove the previous collider
-		this.physics.world.removeCollider(this.playerCollider);
-
-		// Create a Phaser TileMap using the generated map array and the generated wall texture
-		const tilemap = this.make.tilemap({
-			data: map,
-			tileWidth: Config.TileSize,
-			tileHeight: Config.TileSize,
-		});
-		const tileset = tilemap.addTilesetImage("wall");
-		if (tileset === null) {
-			throw new Error("Failed to add a Tileset Image");
-		}
-		const layer = tilemap.createLayer(0, tileset, 0, 0);
-		if (layer === null) {
-			throw new Error("Failed to create tilemap layer.");
-		}
-
-		this.map = tilemap;
-		// Enable collision for wall tiles
-		layer.setCollisionByExclusion([0]);
-
-		// Update the player collider to interact with the new tilemap layer
-		this.playerCollider = this.physics.add.collider(this.player, layer, () => {});
-
-		// Generate loot and place it randomly in empty tiles
-		this.generateLoot(map, Config.TileSize);
-
-		// Add collision detection between the player and loot
-		this.physics.add.overlap(
-			this.player,
-			this.loot,
-			this.collectLoot,
-			undefined,
-			this,
-		);
-
-		// Set up the camera to follow the player
-		this.cameras.main.startFollow(this.player);
-
-		// Set the camera bounds to match the size of the map
-		this.cameras.main.setBounds(
-			0,
-			0,
-			this.map.widthInPixels,
-			this.map.heightInPixels,
-			);
-
-		// Bring the player sprite to the front
-		this.bringPlayerToFront();
-
-		// Bring the grappling hook graphics object to the front
-		this.bringGrapplingHookToFront();
-	}
-
-	private bringPlayerToFront() {
-		this.children.bringToTop(this.player);
-	}
-
-	private bringGrapplingHookToFront() {
-		this.children.bringToTop(this.grapplingHookLine);
 	}
 }
 
