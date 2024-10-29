@@ -109,6 +109,17 @@ class MapGenerator {
 
 		return false;
 	}
+
+	generatePlayableMap(
+		mapWidth: number,
+		mapHeight: number,
+		wallThickness: number = 0,
+	): number[][] {
+		let map: number[][] = Array.from({ length: mapHeight }, () =>
+			Array(mapWidth).fill(0),
+		);
+		return this.generateMap(map, wallThickness, mapWidth, mapHeight);
+	}
 }
 
-export { MapGenerator };
+export { MapGenerator, generatePlayableMap };

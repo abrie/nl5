@@ -1,5 +1,6 @@
 import { Scene, Input } from "phaser";
 import { MapGenerator } from "./MapGenerator";
+import { getTileAt, putTileAt } from "phaser";
 
 const Config = {
 	TileSize: 16,
@@ -63,10 +64,22 @@ class MainScene extends Scene {
 			0x00ff00,
 		);
 
-		// Create the initial tilemap layer using the new updateTilemapLayer method
-		const layer = this.updateTilemapLayer(this.map, map);
+		// Create a Phaser TileMap using the generated map array and the generated wall texture
+		const tilemap = this.make.tilemap({
+			data: map,
+			tileWidth: Config.TileSize,
+			tileHeight: Config.TileSize,
+		});
+		const tileset = tilemap.addTilesetImage("wall");
+		if (tileset === null) {
+			throw new Error("Failed to add a Tileset Image");
+		}
+		const layer = tilemap.createLayer(0, tileset, 0, 0);
+		if (layer === null) {
+			throw new Error("Failed to create tilemap layer.");
+		}
 
-		this.map = layer.tilemap;
+		this.map = tilemap;
 		// Enable collision for wall tiles
 		layer.setCollisionByExclusion([0]);
 
@@ -297,47 +310,15 @@ class MainScene extends Scene {
 			wallThickness,
 			);
 
-		// Create a new tilemap layer using the new updateTilemapLayer method
-		const newLayer = this.updateTilemapLayer(this.map, map);
-
-		// Update the player collider to use the new tilemap layer
-		this.updatePlayerCollider(newLayer);
-
-		// Remove the old loot and generate new loot
-		this.loot.clear(true, true);
-		this.generateLoot(map, Config.TileSize);
-	}
-
-	private updateTilemapLayer(tilemap: Phaser.Tilemaps.Tilemap, map: number[][]): Phaser.Tilemaps.TilemapLayer {
-		// Remove the old layer
-		tilemap.removeAllLayers();
-
-		// Create a new layer with the updated map data
-		const tileset = tilemap.addTilesetImage("wall");
-		if (tileset === null) {
-			throw new Error("Failed to add a Tileset Image");
+		const layer = this.map.getLayer(0).tilemapLayer;
+		for (let row = 0; row < map.length; row++) {
+			for (let col = 0; col < map[row].length; col++) {
+				const tile = getTileAt(layer, col, row);
+				if (tile) {
+					putTileAt(map[row][col], col, row, layer);
+				}
+			}
 		}
-		const layer = tilemap.createLayer(0, tileset, 0, 0);
-		if (layer === null) {
-			throw new Error("Failed to create tilemap layer.");
-		}
-
-		// Enable collision for wall tiles
-		layer.setCollisionByExclusion([0]);
-
-		return layer;
-	}
-
-	private updatePlayerCollider(layer: Phaser.Tilemaps.TilemapLayer) {
-		// Remove the old player collider
-		this.physics.world.removeCollider(this.playerCollider);
-
-		// Enable collision between the player and the new tilemap layer
-		this.playerCollider = this.physics.add.collider(
-			this.player,
-			layer,
-			() => {},
-		);
 	}
 }
 
