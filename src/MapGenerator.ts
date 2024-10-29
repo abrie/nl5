@@ -19,7 +19,7 @@ class MapGenerator {
 				) {
 					map[row][col] = 1;
 				} else {
-					map[row][col] = Math.random() < 0.2 ? 1 : 0;
+					map[row][col] = Math.random() < 0.2 ? 1 : -1;
 				}
 			}
 		}
@@ -31,9 +31,9 @@ class MapGenerator {
 				for (let col = wallThickness; col < cols - wallThickness; col++) {
 					const neighbors = this.countNeighbors(map, row, col);
 					if (map[row][col] === 1) {
-						newMap[row][col] = neighbors >= 4 ? 1 : 0;
+						newMap[row][col] = neighbors >= 4 ? 1 : -1;
 					} else {
-						newMap[row][col] = neighbors >= 5 ? 1 : 0;
+						newMap[row][col] = neighbors >= 5 ? 1 : -1;
 					}
 				}
 			}
@@ -62,7 +62,7 @@ class MapGenerator {
 	/**
 	 * Checks if the playable area in the generated map is sufficient.
 	 * This method uses Depth-First Search (DFS) to traverse the map and count the size of the playable area.
-	 * A playable area is defined as a contiguous region of empty cells (value 0).
+	 * A playable area is defined as a contiguous region of empty cells (value -1).
 	 * The method starts the DFS from the first empty cell found and counts the number of empty cells in the region.
 	 * If the size of the playable area is greater than or equal to the specified threshold, the map is considered playable.
 	 *
@@ -100,7 +100,7 @@ class MapGenerator {
 		// Start DFS from the first empty cell found
 		for (let row = 0; row < rows; row++) {
 			for (let col = 0; col < cols; col++) {
-				if (map[row][col] === 0) {
+				if (map[row][col] === -1) {
 					dfs(row, col);
 					return playableAreaSize >= 100; // Adjust the threshold as needed
 				}
@@ -116,7 +116,7 @@ class MapGenerator {
 		wallThickness: number = 0,
 	): number[][] {
 		let map: number[][] = Array.from({ length: mapHeight }, () =>
-			Array(mapWidth).fill(0),
+			Array(mapWidth).fill(-1),
 		);
 		return this.generateMap(map, wallThickness, mapWidth, mapHeight);
 	}

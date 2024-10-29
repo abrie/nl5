@@ -63,7 +63,7 @@ class MainScene extends Scene {
 		}
 
 		// Enable collision for wall tiles
-		layer.setCollisionByExclusion([0]);
+		layer.setCollisionByExclusion([-1]);
 
 		return tilemap;
 	}
@@ -266,12 +266,12 @@ class MainScene extends Scene {
 
 		for (let row = 0; row < map.length; row++) {
 			for (let col = 0; col < map[row].length; col++) {
-				if (map[row][col] === 0 && Math.random() < 0.1) {
+				if (map[row][col] === -1 && Math.random() < 0.1) {
 					const lootItem = this.loot.create(
 						col * tileSize,
 						row * tileSize,
 						"loot",
-					);
+						);
 					lootItem.setOrigin(0, 0);
 				}
 			}
@@ -332,12 +332,12 @@ class MainScene extends Scene {
 			for (let col = 0; col < map[row].length; col++) {
 				const tile = layer.tilemapLayer.getTileAt(col, row);
 				if (tile) {
-					layer.tilemapLayer.putTileAt(map[row][col] === 0 ? -1 : 0, col, row);
+					layer.tilemapLayer.putTileAt(map[row][col] === -1 ? -1 : 0, col, row);
 				}
 			}
 		}
 
-		layer.tilemapLayer.setCollisionByExclusion([0]);
+		layer.tilemapLayer.setCollisionByExclusion([-1]);
 
 		this.physics.world.colliders.remove(this.playerCollider);
 		this.playerCollider = this.physics.add.collider(
