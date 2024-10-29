@@ -386,10 +386,17 @@ class MainScene extends Scene {
 
 		// Bring the player sprite to the front
 		this.bringPlayerToFront();
+
+		// Bring the grappling hook graphics object to the front
+		this.bringGrapplingHookToFront();
 	}
 
 	private bringPlayerToFront() {
 		this.children.bringToTop(this.player);
+	}
+
+	private bringGrapplingHookToFront() {
+		this.children.bringToTop(this.grapplingHookLine);
 	}
 }
 
